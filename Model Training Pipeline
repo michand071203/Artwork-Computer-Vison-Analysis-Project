@@ -1,0 +1,64 @@
+import torch
+import torch.nn as nn
+from torch.utils.data import DataLoader, Dataset
+from torchvision import models, transforms
+import yaml
+
+class ArtDataset(Dataset):
+    def __init__(self, metadata_db, transform=None):
+        self.db = metadata_db
+        self.transform = transform or self.default_transform()
+        
+    def __len__(self):
+        return len(self.db.feature_store.keys())
+    
+    def __getitem__(self, idx):
+        artwork_id = list(self.db.feature_store.keys())[idx]
+        features = self.db.feature_store[artwork_id][:]
+        metadata = self.db.get_metadata(artwork_id)
+        return {
+            'features': torch.tensor(features),
+            'style': metadata['style'],
+            'artist': metadata['artist']
+        }
+
+class MultiTaskArtModel(nn.Module):
+    def __init__(self, num_styles, num_artists):
+        super().__init__()
+        base = models.resnet50(pretrained=True)
+        self.feature_extractor = nn.Sequential(*list(base.children())[:-1])
+        self.style_classifier = nn.Linear(2048, num_styles)
+        self.artist_classifier = nn.Linear(2048, num_artists)
+        
+    def forward(self, x):
+        features = self.feature_extractor(x).flatten(1)
+        return self.style_classifier(features), self.artist_classifier(features)
+
+def train():
+    # Load config
+    with open("config/settings.yaml") as f:
+        config = yaml.safe_load(f)
+    
+    # Initialize components
+    db = ArtDatabase()
+    model = MultiTaskArtModel(config['model']['num_styles'], 
+                             config['model']['num_artists'])
+    optimizer = torch.optim.AdamW(model.parameters())
+    style_criterion = nn.CrossEntropyLoss()
+    artist_criterion = nn.CrossEntropyLoss()
+    
+    # Training loop
+    for epoch in range(10):
+        for batch in DataLoader(ArtDataset(db), batch_size=32):
+            styles, artists = model(batch['features'])
+            
+            style_loss = style_criterion(styles, batch['style'])
+            artist_loss = artist_criterion(artists, batch['artist'])
+            total_loss = style_loss + artist_loss
+            
+            optimizer.zero_grad()
+            total_loss.backward()
+            optimizer.step()
+            
+        torch.save(model.state_dict(), 
+                  f"{config['model']['checkpoint_dir']}/model_epoch_{epoch}.pth")
