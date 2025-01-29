@@ -1,0 +1,29 @@
+
+art-analysis-system/
+├── config/
+│   └── settings.yaml
+├── data/
+│   ├── raw_images/
+│   ├── processed/
+│   └── database/
+│       ├── art_metadata.db
+│       └── feature_store.h5
+├── models/
+│   ├── model_training.py
+│   └── trained_models/
+├── api/
+│   ├── google_art.py
+│   ├── wikidata.py
+│   └── metmuseum.py
+├── database/
+│   ├── schema.sql
+│   ├── db_handler.py
+│   └── migrations/
+├── processing/
+│   ├── image_processor.py
+│   └── feature_extractor.py
+├── workflows/
+│   ├── data_pipeline.py
+│   ├── training_pipeline.py
+│   └── analysis_pipeline.py
+└── requirements.txt
