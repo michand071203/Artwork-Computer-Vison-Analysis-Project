@@ -1,0 +1,28 @@
+CREATE TABLE IF NOT EXISTS artworks (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT,
+    artist TEXT,
+    year INTEGER,
+    style TEXT,
+    movement TEXT,
+    features BLOB,
+    source_url TEXT,
+    api_ids JSON,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS artists (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT UNIQUE,
+    birth_year INTEGER,
+    death_year INTEGER,
+    movement TEXT,
+    nationality TEXT
+);
+
+CREATE TABLE IF NOT EXISTS similar_artworks (
+    artwork_id INTEGER,
+    similar_id INTEGER,
+    similarity_score REAL,
+    PRIMARY KEY (artwork_id, similar_id)
+);
