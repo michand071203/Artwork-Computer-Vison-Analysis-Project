@@ -1,0 +1,50 @@
+Artwork Identification and Analysis System
+
+Overview
+This is a project on an artwork identification and analysis system that combines computer vision, machine learning, and art historical databases to provide comprehensive insights into artworks. 
+
+It is meant to help you:
+
+Identify unknown artworks
+
+Classify art styles and movements
+
+Attribute artworks to artists
+
+Discover similar pieces
+
+Enrich your knowledge with historical context
+
+This project is a work in progress, aiming to bridge the gap between art and technology by leveraging state-of-the-art machine learning models and extensive art databases.
+
+Features
+Core Functionality
+Artwork Identification: Upload an image to identify the artwork, artist, and creation date.
+
+Style Classification: Classify artworks into styles (e.g., Renaissance, Impressionism, Abstract).
+
+Artist Attribution: Predict the artist with confidence scores.
+
+Metadata Enrichment: Retrieve detailed information about the artwork, including historical context and provenance.
+
+Similar Artwork Search: Discover visually and thematically similar artworks.
+
+Advanced Features
+Multi-Source Data Integration: Combines data from Google Art, Wikidata, and the Metropolitan Museum of Art API.
+
+Hybrid Analysis: Uses both machine learning predictions and art historical databases for accurate results.
+
+Explainable AI: Provides Grad-CAM visualizations to explain classification decisions.
+
+Scalable Database: Stores artwork metadata and feature vectors for efficient retrieval and analysis.
+
+How It Works
+Image Upload: Users upload an image of an artwork.
+
+Feature Extraction: A deep learning model extracts visual features from the image.
+
+Metadata Retrieval: The system queries multiple APIs to gather historical and contextual data.
+
+Analysis & Prediction: The model predicts the artwork's style, artist, and other attributes.
+
+Results Display: Users receive a detailed report with identification results, historical context, and similar artworks.
