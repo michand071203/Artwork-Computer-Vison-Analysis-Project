@@ -1,0 +1,52 @@
+import sqlite3
+import h5py
+import yaml
+import numpy as np
+from typing import Dict, List
+
+class ArtDatabase:
+    def __init__(self, config_path="config/settings.yaml"):
+        with open(config_path) as f:
+            config = yaml.safe_load(f)
+            
+        self.conn = sqlite3.connect(config['database']['path'])
+        self.feature_store = h5py.File(config['database']['feature_store'], 'a')
+        
+    def add_artwork(self, metadata: Dict, features: np.ndarray):
+        cur = self.conn.cursor()
+        cur.execute('''
+            INSERT INTO artworks 
+            (title, artist, year, style, movement, features, source_url, api_ids)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (
+            metadata.get('title'),
+            metadata.get('artist'),
+            metadata.get('year'),
+            metadata.get('style'),
+            metadata.get('movement'),
+            features.tobytes(),
+            metadata.get('source_url'),
+            json.dumps(metadata.get('api_ids', {}))
+        ))
+        artwork_id = cur.lastrowid
+        self.conn.commit()
+        
+        # Store features in HDF5
+        self.feature_store.create_dataset(f'artwork_{artwork_id}', data=features)
+        
+    def find_similar(self, query_features: np.ndarray, top_k=5) -> List[Dict]:
+        # Implement cosine similarity search
+        similarities = []
+        for artwork_id in self.feature_store.keys():
+            stored_features = self.feature_store[artwork_id][:]
+            score = np.dot(query_features, stored_features) / (
+                np.linalg.norm(query_features) * np.linalg.norm(stored_features)
+            )
+            similarities.append((artwork_id, score))
+            
+        return sorted(similarities, key=lambda x: x[1], reverse=True)[:top_k]
+
+    def get_metadata(self, artwork_id: int) -> Dict:
+        cur = self.conn.cursor()
+        cur.execute('SELECT * FROM artworks WHERE id = ?', (artwork_id,))
+        return dict(zip([desc[0] for desc in cur.description], cur.fetchone()))
